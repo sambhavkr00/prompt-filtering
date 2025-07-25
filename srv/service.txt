@@ -1,0 +1,240 @@
+//service.js
+
+const cds = require("@sap/cds");
+const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
+const { HumanMessage } = require("@langchain/core/messages");
+
+require("dotenv").config();
+
+module.exports = cds.service.impl(async function () {
+  this.on("getFilteredRecords", async (req) => {
+    const { prompt } = req.data;
+    const { Customers } = this.entities;
+
+    if (!prompt) {
+      return await SELECT.from(Customers);
+    }
+
+    const llm = new ChatGoogleGenerativeAI({
+      model: "gemini-2.5-flash",
+      apiKey: process.env.GOOGLE_API_KEY,
+    });
+
+    const extractionFunctionSchema = {
+      name: "extractor",
+      description: "Extracts filtering keywords from a user's prompt.",
+      parameters: {
+        type: "object",
+        properties: {
+          ID: { type: "array", items: { type: "string" } },
+          name: { type: "array", items: { type: "string" } },
+          email: { type: "array", items: { type: "string" } },
+          phone: { type: "array", items: { type: "string" } },
+          address: { type: "array", items: { type: "string" } },
+          city: { type: "array", items: { type: "string" } },
+          state: { type: "array", items: { type: "string" } },
+          country: { type: "array", items: { type: "string" } },
+          joinDate: { type: "array", items: { type: "string" } },
+        },
+      },
+    };
+
+    const runnable = llm.bindTools([extractionFunctionSchema], {
+      tool_choice: { type: "function", function: { name: "extractor" } },
+    });
+
+    const message = new HumanMessage({
+      content: `Extract filtering keywords from the following prompt: ${prompt}`,
+    });
+
+    const response = await runnable.invoke([message]);
+
+    if (!response.tool_calls || response.tool_calls.length === 0) {
+      return [];
+    }
+    const keywords = response.tool_calls[0].args;
+
+    let query = SELECT.from(Customers);
+    const conditions = [];
+
+    for (const key in keywords) {
+      if (keywords[key]) {
+        if (key === "ID" && Array.isArray(keywords[key])) {
+          // Handle multiple IDs
+          conditions.push({ ID: { in: keywords[key].map(id => parseInt(id)) } });
+        } else if (Array.isArray(keywords[key])) {
+          // Handle other fields with multiple values (IN operator)
+          conditions.push({ [key]: { in: keywords[key] } });
+        } else {
+          // Handle single values with LIKE operator
+          conditions.push({ [key]: { like: `%${keywords[key]}%` } });
+        }
+      }
+    }
+
+    if (conditions.length > 0) {
+      if (conditions.length === 1) {
+        query.where(conditions[0]);
+      } else {
+        query.where({ and: conditions });
+      }
+    }
+
+    const customers = await this.run(query);
+    return customers;
+  });
+});
+
+
+
+
+// With Global Search
+
+const cds = require("@sap/cds");
+const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
+const { HumanMessage } = require("@langchain/core/messages");
+
+require("dotenv").config();
+
+module.exports = cds.service.impl(async function () {
+  this.on("getFilteredRecords", async (req) => {
+    const { entityName, prompt } = req.data;
+    const entity = this.entities[entityName];
+
+    if (!entity) {
+      return req.error(404, `Entity ${entityName} not found.`);
+    }
+
+    if (!prompt) {
+      const results = await SELECT.from(entity);
+      return JSON.stringify(results);
+    }
+
+    // Global search for simple values
+    if (prompt.split(" ").length === 1) {
+      const entityDefinition = cds.model.definitions[entity.name];
+      let allResults = [];
+      const primaryKey = Object.keys(entityDefinition.elements).find(
+        (key) => entityDefinition.elements[key].key
+      );
+
+      for (const key in entityDefinition.elements) {
+        const element = entityDefinition.elements[key];
+        let query;
+        if (element.type === "cds.String") {
+          query = SELECT.from(entity).where({ [key]: { like: `%${prompt}%` } });
+        } else if (
+          (element.type === "cds.Integer" || element.type === "cds.Decimal") &&
+          !isNaN(prompt)
+        ) {
+          query = SELECT.from(entity).where({ [key]: parseInt(prompt) });
+        } else if (
+          element.type === "cds.Date" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(prompt)
+        ) {
+          query = SELECT.from(entity).where({ [key]: prompt });
+        }
+
+        if (query) {
+          const results = await this.run(query);
+          allResults.push(...results);
+        }
+      }
+
+      // Remove duplicates
+      const uniqueResults = allResults.filter(
+        (v, i, a) => a.findIndex((t) => t[primaryKey] === v[primaryKey]) === i
+      );
+
+      return JSON.stringify(uniqueResults);
+    }
+
+    const llm = new ChatGoogleGenerativeAI({
+      model: "gemini-2.5-flash",
+      apiKey: process.env.GOOGLE_API_KEY,
+    });
+
+    const entityDefinition = cds.model.definitions[entity.name];
+    const properties = {};
+    let primaryKey = "";
+    for (const key in entityDefinition.elements) {
+      if (entityDefinition.elements[key].key) {
+        primaryKey = key;
+      }
+      // Exclude association and composition properties
+      if (
+        !entityDefinition.elements[key].is2one &&
+        !entityDefinition.elements[key].is2many
+      ) {
+        properties[key] = { type: "array", items: { type: "string" } };
+      }
+    }
+
+    const extractionFunctionSchema = {
+      name: "extractor",
+      description: "Extracts filtering keywords from a user's prompt.",
+      parameters: {
+        type: "object",
+        properties: properties,
+      },
+    };
+
+    const runnable = llm.bindTools([extractionFunctionSchema], {
+      tool_choice: { type: "function", function: { name: "extractor" } },
+    });
+
+    const message = new HumanMessage({
+      content: `Extract filtering keywords from the following prompt: ${prompt}`,
+    });
+
+    const response = await runnable.invoke([message]);
+
+    if (!response.tool_calls || response.tool_calls.length === 0) {
+      return [];
+    }
+    const keywords = response.tool_calls[0].args;
+
+    let query = SELECT.from(entity);
+
+    const conditions = [];
+
+    for (const key in keywords) {
+      if (keywords[key]) {
+        if (key === primaryKey) {
+          if (Array.isArray(keywords[key])) {
+            conditions.push({
+              [primaryKey]: { in: keywords[key].map((id) => parseInt(id)) },
+            });
+          } else {
+            conditions.push({ [primaryKey]: parseInt(keywords[key]) });
+          }
+        } else {
+          if (Array.isArray(keywords[key])) {
+            const likeConditions = keywords[key].map((value) => ({
+              [key]: { like: `%${value}%` },
+            }));
+            if (likeConditions.length === 1) {
+              conditions.push(likeConditions[0]);
+            } else {
+              conditions.push({ or: likeConditions });
+            }
+          } else {
+            conditions.push({ [key]: { like: `%${keywords[key]}%` } });
+          }
+        }
+      }
+    }
+
+    if (conditions.length > 0) {
+      if (conditions.length === 1) {
+        query.where(conditions[0]);
+      } else {
+        query.where({ and: conditions });
+      }
+    }
+
+    const results = await this.run(query);
+    return JSON.stringify(results);
+  });
+});
+
