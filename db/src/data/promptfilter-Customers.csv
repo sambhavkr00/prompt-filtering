@@ -1,0 +1,21 @@
+ID,name,email,phone,address,city,state,country,joinDate
+101,John Doe,john.doe@example.com,+1-555-0101,123 Maple St,Atlanta,GA,UK,2024-11-20
+102,Jane Smith,jane.smith@example.com,+1-555-0102,456 Oak Ave,Boston,MA,India,2024-12-05
+103,Peter Jones,peter.jones@example.com,+1-555-0103,789 Pine Rd,Chicago,IL,Germany,2025-01-07
+104,Mary Williams,mary.williams@example.com,+1-555-0104,321 Birch Blvd,Dallas,TX,Mexico,2025-01-20
+105,David Brown,david.brown@example.com,+1-555-0105,654 Cedar Ln,Denver,CO,Japan,2025-02-15
+106,Susan Miller,susan.miller@example.com,+1-555-0106,987 Spruce Dr,Seattle,WA,Brazil,2025-03-01
+107,Richard Garcia,richard.garcia@example.com,+1-555-0107,147 Willow Way,Miami,FL,Italy,2025-03-10
+108,Patricia Martinez,patricia.martinez@example.com,+1-555-0108,258 Aspen Pl,Phoenix,AZ,Australia,2025-04-05
+109,Charles Rodriguez,charles.rodriguez@example.com,+1-555-0109,369 Redwood Ct,Portland,OR,Canada,2025-04-18
+110,Linda Hernandez,linda.hernandez@example.com,+1-555-0110,741 Cypress St,San Jose,CA,Spain,2025-04-30
+111,Barbara Clark,barbara.clark@example.com,+1-555-0111,852 Maple St,Houston,TX,France,2025-05-12
+112,Steven Lewis,steven.lewis@example.com,+1-555-0112,963 Oak Ave,Philadelphia,PA,South Korea,2025-05-25
+113,Jessica Lee,jessica.lee@example.com,+1-555-0113,159 Pine Rd,San Diego,CA,Sweden,2025-06-03
+114,George Walker,george.walker@example.com,+1-555-0114,753 Birch Blvd,Las Vegas,NV,UK,2025-06-10
+115,Karen Hall,karen.hall@example.com,+1-555-0115,357 Cedar Ln,Austin,TX,India,2025-06-18
+116,Edward Allen,edward.allen@example.com,+1-555-0116,951 Spruce Dr,Charlotte,NC,Germany,2025-07-02
+117,Michelle Young,michelle.young@example.com,+1-555-0117,258 Willow Way,Columbus,OH,Canada,2025-07-08
+118,Brian King,brian.king@example.com,+1-555-0118,147 Aspen Pl,Detroit,MI,Japan,2025-07-14
+119,Laura Wright,laura.wright@example.com,+1-555-0119,369 Redwood Ct,Jacksonville,FL,France,2025-07-20
+120,Kevin Scott,kevin.scott@example.com,+1-555-0120,741 Cypress St,Indianapolis,IN,Australia,2025-07-28

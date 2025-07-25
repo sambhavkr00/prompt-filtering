@@ -1,0 +1,11 @@
+ID,name,description,category,price,stock,createdDate
+201,Laptop,High-performance laptop,Electronics,1500.0,25,2024-05-15
+202,Mouse,Ergonomic wireless mouse,Accessories,50.0,200,2024-06-01
+203,Keyboard,Mechanical gaming keyboard,Accessories,120.0,150,2024-06-20
+204,Monitor,27-inch 4K monitor,Electronics,800.0,40,2024-07-10
+205,Webcam,1080p HD webcam,Accessories,75.0,120,2024-08-01
+206,Headphones,Noise-cancelling headphones,Audio,200.0,100,2024-09-05
+207,Desk Lamp,LED desk lamp with dimmer,Office,40.0,180,2024-09-20
+208,USB-C Cable,1m USB-C to USB-C cable,Accessories,15.0,300,2024-10-01
+209,External SSD,1TB portable SSD,Storage,250.0,60,2024-10-15
+210,Office Chair,Ergonomic office chair,Furniture,300.0,35,2024-11-01

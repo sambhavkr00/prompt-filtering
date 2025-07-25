@@ -1,0 +1,52 @@
+<mvc:View
+  controllerName="filteringapp.controller.CustomersList"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:l="sap.ui.layout"
+>
+  <Page id="listPage" title="{i18n>title}" class="sapUiContentPadding">
+    <content>
+      <VBox class="sapUiSmallMargin">
+        <Title text="{i18n>pageTitle}" level="H2" />
+        <Text
+          text="{i18n>filterDisclaimer}"
+          class="sapUiSmallMarginBottom"
+        />
+        <Panel headerText="Filter" expandable="true" expanded="true" class="sapUiSmallMarginBottom">
+          <content>
+            <l:HorizontalLayout class="sapUiContentPadding">
+              <Label labelFor="entitySelect" text="Entity" />
+              <Select id="entitySelect" class="sapUiSmallMarginEnd" change="onEntityChange"
+                items="{
+                  path: 'entityModel>/entities',
+                  sorter: { path: 'name' }
+                }">
+                <core:Item key="{entityModel>name}" text="{entityModel>name}" xmlns:core="sap.ui.core" />
+              </Select>
+              <Label labelFor="filterInput" text="{i18n>filterByPrompt}" />
+              <Input
+                id="filterInput"
+                placeholder="{i18n>filterInputPlaceholder}"
+                width="400px"
+                class="sapUiSmallMarginEnd"
+                submit="onFilter"
+              />
+              <Button id="filterGo" text="Go" press="onFilter" type="Emphasized" />
+            </l:HorizontalLayout>
+          </content>
+        </Panel>
+        <Title id="tableTitle" text="{titleModel>/title}" level="H2" class="sapUiSmallMarginBottom" />
+        <Table id="listTable" items="{tableModel>/items}" >
+          <columns>
+            <!-- Columns will be generated dynamically -->
+          </columns>
+          <items>
+            <ColumnListItem>
+              <!-- Cells will be generated dynamically -->
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>
